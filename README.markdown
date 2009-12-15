@@ -10,16 +10,16 @@ INSTALLATION
 
 1. Install this extension
 
-      script/extension install git://github.com/yacc/spree-subscriptions.git
+    `script/extension install git://github.com/yacc/spree-subscriptions.git`
 
 2. Run pending migrations
 
-      rake db:migrate
+    `rake db:migrate`
 
 
 3. The extension includes a whenever (gem) schedule to setup a cron job to process billing / notifications, to generate the cron job run the following:
 
-			whenever --load-file -w vendor/extensions/subscriptions/config/schedule.rb 
+    `whenever --load-file -w vendor/extensions/subscriptions/config/schedule.rb`
 			
 4. Using the admin interface you should now have a "Subscribable" drop-down list when adding / editing variants. If you select True on this drop down and the then set the subscription option types which are:
 	
@@ -27,7 +27,11 @@ INSTALLATION
 	
 	Interval: This can be either "Month" or "Year", combined with the duration above to calculate how often a subscription is renewed (charged).
 	
-	
+TESTING:
+--------
+
+After installing the extension, create and migrate your test database, then cd to the extension directory and type: `rake spec`.	
+
 NOTES
 -----
 
