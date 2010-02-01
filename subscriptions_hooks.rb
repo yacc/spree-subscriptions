@@ -36,7 +36,7 @@ class SubscriptionsHooks < Spree::ThemeSupport::HookListener
   # adding a new tab to the admin navigation
   #
   insert_after :admin_tabs do
-    tab(:subscriptions)
+    %(<%=  tab(:subscriptions)  %>) 
   end
   #
 end
