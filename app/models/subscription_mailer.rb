@@ -1,7 +1,7 @@
 class SubscriptionMailer < ActionMailer::QueueMailer
   helper "spree/base"
-  
-  def payement_receipt(subscription)
+
+  def payment_receipt(subscription)
     @subject    = Spree::Config[:site_name] + ' ' + 'Subscription Renewal #' + subscription.id.to_s
     @body       = {"subscription" => subscription}
     @recipients = subscription.user.email

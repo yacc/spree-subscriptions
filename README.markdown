@@ -21,7 +21,7 @@ INSTALLATION
 
     `whenever --load-file -w vendor/extensions/subscriptions/config/schedule.rb`
 			
-4. Using the admin interface you should now have a "Subscribable" drop-down list when adding / editing variants. If you select True on this drop down and the then set the subscription option types which are:
+4. Using the admin interface you should now have a "Subscribable" drop-down list when adding / editing variants. If you select True on this drop down and then set the subscription option types which are:
 	
 	Duration: The number of intervals between subscription renewals (charges).
 	
