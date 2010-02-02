@@ -27,6 +27,19 @@ INSTALLATION
 	
 	Interval: This can be either "Month" or "Year", combined with the duration above to calculate how often a subscription is renewed (charged).
 	
+	For example:
+	. Duration=1 and Interval=month: montly recurring payment 
+	. Duration=1 and Interval=year:  yearly recurring payment 
+ 
+DEVELOPMENT:
+------------
+If you need to debug the recurring payments - maybe because you're using a non tested gateway - follow these steps:
+1. Start a Rails console, and:
+  RAILS_ENV=development script/console (--debugger if you're planning on using the debugger to step in the code)
+2. Start the SubscriptionManager
+  SubscriptionManager.process
+
+
 TESTING:
 --------
 
@@ -47,3 +60,16 @@ Subscriptions never expire provided a valid credit card is kept on file.
 
 
 The cron job will notify users of expiring credit cards, and will "expire" subscriptions if no new card details are provided when a subscription renewal is due.
+
+SHOP SETTINGS:
+--------------
+You might want to define a shipping and a tax category for your service plan.
+Also, you'll have to define new option types for your new subscribable product:
+      subscription-duration	Duration	 
+      subscription-interval	Interval
+Then, add a new variant to yur product as decribe earlier.
+
+TODO:
+-----
+1. Make sure we handle well case where variant of subscription is modified
+2. Subscription are not available to guest, you have to login to buy a subscription

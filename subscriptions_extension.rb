@@ -55,8 +55,12 @@ class SubscriptionsExtension < Spree::Extension
     
     LineItem.class_eval do
       def subscribable?
-	(self.variant.is_master? && self.variant.product.subscribable?) || 
-	  (!self.variant.is_master? && self.variant.subscribable?)
+	debugger
+	if self.variant.product.respond_to?(:subcribable?) 
+	  self.variant.is_master? && self.variant.product.subscribable? 
+	elsif self.variant.respond_to?(:subscribable?)
+	  !self.variant.is_master? && self.variant.subscribable?
+	end
       end      
     end
     
@@ -73,7 +77,6 @@ class SubscriptionsExtension < Spree::Extension
 
 	order.line_items.each do |line_item|
 	  if line_item.subscribable?
-	    debugger
 	    if payment_profile_key.nil?
 	      #setup payment profile
 	      gateway = Gateway.find(:first, :conditions => {:active => true, :environment => ENV['RAILS_ENV']})
@@ -84,7 +87,6 @@ class SubscriptionsExtension < Spree::Extension
 	    end
 	    
 	    #get subscription info
-	    debugger
 	    interval = line_item.variant.option_values.detect { |ov| ov.option_type.name == "subscription-interval"}.name
 	    duration = line_item.variant.option_values.detect { |ov| ov.option_type.name == "subscription-duration"}.name
 
@@ -97,7 +99,6 @@ class SubscriptionsExtension < Spree::Extension
 					       :payment_profile_key => payment_profile_key)
 	    
 	    #add dummy first payment (real payment was taken by normal checkout)
-	    debugger
 	    payment = CreditcardPayment.create(:subscription => subscription, :amount => line_item.variant.price,
 					       :type => "CreditcardPayment", :creditcard => creditcard)
 	    payment.creditcard_txns == creditcard.creditcard_txns

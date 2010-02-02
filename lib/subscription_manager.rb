@@ -11,6 +11,8 @@ class SubscriptionManager
   def SubscriptionManager.check_for_renewals(subscriptions)
 
     subscriptions.each do |sub|
+      debugger
+      pp sub.due_on
       next unless sub.due_on.to_time <= Time.now()
       #subscription due for renewal
       

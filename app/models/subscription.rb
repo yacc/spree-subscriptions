@@ -5,6 +5,8 @@ class Subscription < ActiveRecord::Base
   has_many :payments, :dependent => :destroy, :order => :created_at
   has_many :expiry_notifications
   
+  #TODO:yacin: validates_presence_of :user
+    
   before_save :set_dates
   
   state_machine :state, :initial => 'active' do
