@@ -73,3 +73,4 @@ TODO:
 -----
 1. Make sure we handle well case where variant of subscription is modified
 2. Subscription are not available to guest, you have to login to buy a subscription
+3. Allow for disabling Delivery step for subscriptions
