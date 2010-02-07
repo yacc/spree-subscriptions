@@ -2,8 +2,8 @@
 # require_dependency 'application'
 
 class SubscriptionsExtension < Spree::Extension
-  version "1.0"
-  description "Describe your extension here"
+  version "0.8.5"
+  description "Subscription extension for Spree (tested with Authorized.net CIM"
   url "http://yourwebsite.com/subscription"
   
   def activate
@@ -55,8 +55,7 @@ class SubscriptionsExtension < Spree::Extension
     
     LineItem.class_eval do
       def subscribable?
-	debugger
-	if self.variant.product.respond_to?(:subcribable?) 
+	if self.variant.product.respond_to?(:subscribable?) 
 	  self.variant.is_master? && self.variant.product.subscribable? 
 	elsif self.variant.respond_to?(:subscribable?)
 	  !self.variant.is_master? && self.variant.subscribable?
@@ -73,18 +72,15 @@ class SubscriptionsExtension < Spree::Extension
       def subscriptions_check
 	return unless ( complete? && creditcard ) 
 	
-	payment_profile_key = nil
-
+	# payment_profile_key = nil
+	
 	order.line_items.each do |line_item|
-	  if line_item.subscribable?
-	    if payment_profile_key.nil?
-	      #setup payment profile
-	      gateway = Gateway.find(:first, :conditions => {:active => true, :environment => ENV['RAILS_ENV']})
-	      gate_opts = creditcard.gateway_options
-	      response = gateway.provider.store(creditcard, gate_opts)
-	      creditcard.gateway_error(response) unless response.success?
-	      payment_profile_key = response.params['customerCode']	
-	    end
+	  if line_item.subscribable?	    
+	    #TODO: test that GW supports CIM
+	    
+	    #get customer profile information (saved with CC if GW supports it)
+	    payment_profile_key = creditcard.gateway_customer_profile_id
+	    gate_opts = creditcard.gateway_options
 	    
 	    #get subscription info
 	    interval = line_item.variant.option_values.detect { |ov| ov.option_type.name == "subscription-interval"}.name
@@ -99,6 +95,7 @@ class SubscriptionsExtension < Spree::Extension
 					       :payment_profile_key => payment_profile_key)
 	    
 	    #add dummy first payment (real payment was taken by normal checkout)
+	    #TODO: do I need to create a fake payment, now that I have a handle on the CC payment?
 	    payment = CreditcardPayment.create(:subscription => subscription, :amount => line_item.variant.price,
 					       :type => "CreditcardPayment", :creditcard => creditcard)
 	    payment.creditcard_txns == creditcard.creditcard_txns

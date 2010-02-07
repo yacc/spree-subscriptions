@@ -2,14 +2,18 @@ include ActionView::Helpers::DateHelper
 
 class SubscriptionManager
   
-  def SubscriptionManager.process
+  def SubscriptionManager.process()
+    report = {:active => 0, :processed => 0,:reminded => 0, :expired => 0}
     subscriptions = Subscription.find(:all, :conditions => {:state => 'active'})
-    check_for_renewals(subscriptions)
-    check_for_creditcard_expiry(subscriptions)
+    subscriptions.empty? ? (return report) : (report[:active] = subscriptions.size)
+    report[:processed] = check_for_renewals(subscriptions)
+    report[:expired] = check_for_creditcard_expiry(subscriptions)
+    report
   end
   
   def SubscriptionManager.check_for_renewals(subscriptions)
-
+    nb_payments = 0
+    debugger
     subscriptions.each do |sub|
       next unless sub.due_on.to_time <= Time.now()
       #subscription due for renewal
@@ -18,7 +22,7 @@ class SubscriptionManager
       amount = sub.variant.price * 100
       gateway = Gateway.find(:first, :conditions => {:active => true, :environment => ENV['RAILS_ENV']})
       response = gateway.purchase(amount, sub.payment_profile_key)
-      puts response.to_yaml	
+      puts response.to_yaml
       if response.success?
 	payment = CreditcardPayment.create(:subscription => sub, :amount => sub.variant.price,
 					   :type => "CreditcardPayment", :creditcard => sub.creditcard)
@@ -28,13 +32,15 @@ class SubscriptionManager
 						     :txn_type => CreditcardTxn::TxnType::PURCHASE
 						     )
 	subscription.payments << payment
+	nb_payments = nb_payments+1
 	SubscriptionMailer.deliver_payment_receipt(sub)
       end
     end
+    nb_payments
   end
   
   def SubscriptionManager.check_for_creditcard_expiry(subscriptions)
-
+    nb_notice = 0
     subscriptions.each do |sub|
       cc_exp_date_day = Time.parse("#{sub.creditcard.month}/#{sub.creditcard.year}").end_of_month
       cc_exp_date = "#{sub.creditcard.month}/#{cc_exp_date_day}/#{sub.creditcard.year}".to_time
@@ -50,6 +56,7 @@ class SubscriptionManager
 	  unless ExpiryNotification.exists?(:subscription_id => sub.id, :interval => interval.seconds.to_i)
 	    notification = ExpiryNotification.create(:subscription_id => sub.id, :interval => interval.seconds)
 	    SubscriptionMailer.deliver_expiry_warning(sub, within)
+	    nb_notice = nb_notice+1
 	  end
 
 	  break
@@ -60,8 +67,10 @@ class SubscriptionManager
       if cc_exp_date < Time.now 
 	sub.expire
 	SubscriptionMailer.deliver_creditcard_expired(sub)
+	nb_notice = nb_notice+1
       end
       
-    end		
+    end
+    nb_notice
   end
 end
