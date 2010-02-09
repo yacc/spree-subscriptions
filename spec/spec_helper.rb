@@ -62,17 +62,16 @@ def create_subscription_new_order_with_valid_credit_card
   @checkout.creditcard = @creditcard
   @checkout.state = "complete"
   @checkout.save
-  #  @order.complete! 
 end
   
 def create_subscription_new_order_with_expired_credit_card
+  #first order goes throught, but then the cc expires
   create_subscription_complete_order
   @creditcard = Factory(:creditcard, :verification_value => '123', :number => '4242424242424242',
-			  :month => 9, :year => Time.now.year + 1, :first_name => 'John', :last_name => 'Doe')
-  @creditcard.update_attribute(:year, '2001')
+			  :month => 9, :year => Time.now.year, :first_name => 'John', :last_name => 'Doe')
   @checkout.creditcard = @creditcard
   @checkout.state = "complete"
   @checkout.save
-  #  @order.complete!
+  @creditcard.update_attribute(:year, Time.now.year-3)
 end
 

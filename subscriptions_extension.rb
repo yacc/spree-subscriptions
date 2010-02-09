@@ -96,10 +96,11 @@ class SubscriptionsExtension < Spree::Extension
 	    
 	    #add dummy first payment (real payment was taken by normal checkout)
 	    #TODO: do I need to create a fake payment, now that I have a handle on the CC payment?
-	    payment = CreditcardPayment.create(:subscription => subscription, :amount => line_item.variant.price,
-					       :type => "CreditcardPayment", :creditcard => creditcard)
-	    payment.creditcard_txns == creditcard.creditcard_txns
-	    subscription.payments << payment
+	    # payment = CreditcardPayment.create(:subscription => subscription, :amount => line_item.variant.price,
+	    #				       :type => "CreditcardPayment", :creditcard => creditcard)
+	    #payment.creditcard_txns = creditcard.creditcard_txns
+	    #TODO:yacin: better logic here that the first payment
+	    #### subscription.payments << order.payments.first 
 	    subscription.save
 	  end
 	end

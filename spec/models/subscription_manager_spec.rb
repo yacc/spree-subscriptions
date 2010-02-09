@@ -13,7 +13,7 @@ describe SubscriptionManager do
 
     it "should do nothing" do
       @sub = Factory(:subscription,:state => 'expired', :creditcard => @creditcard)
-      SubscriptionManager.process.should == {:active => 0, :processed => 0,:reminded => 0, :expired => 0}
+      SubscriptionManager.process.should == {:active => 0, :processed => 0,:reminded => 0, :expired => 0, :error =>0}
     end
   end
 
@@ -28,20 +28,21 @@ describe SubscriptionManager do
 	Subscription.count().should == 1
 	Subscription.find(:all, :conditions => {:state => 'active'}).size.should == 1
 	report = SubscriptionManager.process
-	report.should == {:active => 1, :processed => 1,:reminded => 0, :expired => 0}
+	report.should == {:active => 1, :processed => 1,:reminded => 0, :expired => 0, :error =>0}
+	Order.count.should == 25
       end
     end
     
     context "with expired credit card" do
       
       it "should find one active subscription and process one notice" do
-	# @creditcard.update_attribute(:year, '2001')
-	# @sub = Factory(:subscription,:state => 'active', :creditcard => @creditcard)
-	create_subscription_new_order_with_expired_credit_card	
+	create_subscription_new_order_with_expired_credit_card 
+	ActiveMerchant::Billing::AuthorizeNetCimGateway.force_failure = true
 	Subscription.count().should == 1
 	Subscription.find(:all, :conditions => {:state => 'active'}).size.should == 1
-	report = SubscriptionManager.process
-	report.should == {:active => 1, :processed => 0,:reminded => 1, :expired => 0}
+	report = SubscriptionManager.process 
+	report.should == {:active => 1, :processed => 0,:reminded => 1, :expired => 1, :error => 1}
+	Order.count.should == 24
       end
     end
     
